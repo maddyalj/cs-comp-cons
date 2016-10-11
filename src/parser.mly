@@ -34,48 +34,35 @@
 %%
 
 top:
-    | fl = separated_list(FUNC_SEP, func_wrap); EOF { fl }
-;
+    | separated_list(FUNC_SEP, func_wrap) EOF   { $1 }
 
 func_wrap:
-    | FUNC; f = func; RIGHT_BRACE { f }
-    | FUNC; f = func              { f }
-    |       f = func; RIGHT_BRACE { f }
-    |       f = func              { f }
+    | FUNC func RIGHT_BRACE     { $2 }
+    | FUNC func                 { $2 }
+    |       func RIGHT_BRACE    { $1 }
+    |       func                { $1 }
 
 func:
-    | i = ID; LEFT_PAREN; p = params; RIGHT_PAREN; LEFT_BRACE; e = exp
-                                                                 { (i, p, e) }
-;
-
-/*exp_wrap:
-    | e = exp;
-    | e = exp; SEMICOLON;*/
+    | ID LEFT_PAREN params RIGHT_PAREN LEFT_BRACE exp   { ($1, $3, $6) }
 
 exp:
-    | LET; i = ID; EQUALS; e1 = exp; SEMICOLON; e2 = exp { `Let (i, e1, e2) }
-    | e1 = exp; SEMICOLON; e2 = exp                              { `Seq (e1, e2) }
-    | IF; LEFT_PAREN; e1 = exp; RIGHT_PAREN;
-        LEFT_BRACE; e2 = exp; RIGHT_BRACE;
-      ELSE;
-        LEFT_BRACE; e3 = exp; RIGHT_BRACE                        { `IfElse (e1, e2, e3) }
-    | IF; LEFT_PAREN; e1 = exp; RIGHT_PAREN;
-        LEFT_BRACE; e2 = exp; RIGHT_BRACE                        { `If (e1, e2) }
-    | WHILE; LEFT_PAREN; e1 = exp; RIGHT_PAREN;
-        LEFT_BRACE; e2 = exp; RIGHT_BRACE                        { `While (e1, e2) }
-    | e1 = op_exp; o = op; e2 = op_exp                           { `Operator (o, e1, e2) }
-    | i = ID; EQUALS; e = op_exp                         { `Asg ((`Id i), e) }
-    | RETURN; e = exp                                            { `Return e }
-    | s = ID                                             { `Deref (`Id s) }
-    | i = INT                                                    { `Const i }
-    | e = exp; SEMICOLON { e }
-;
+    | LET ID EQUALS exp SEMICOLON exp                               { `Let ($2, $4, $6) }
+    | exp SEMICOLON exp                                             { `Seq ($1, $3) }
+    | IF LEFT_PAREN exp RIGHT_PAREN LEFT_BRACE exp RIGHT_BRACE
+        ELSE LEFT_BRACE exp RIGHT_BRACE                             { `IfElse ($3, $6, $10) }
+    | IF LEFT_PAREN exp RIGHT_PAREN LEFT_BRACE exp RIGHT_BRACE      { `If ($3, $6) }
+    | WHILE LEFT_PAREN exp RIGHT_PAREN LEFT_BRACE exp RIGHT_BRACE   { `While ($3, $6) }
+    | op_exp op op_exp                                              { `Operator ($2, $1, $3) }
+    | ID EQUALS op_exp                                              { `Asg ((`Id $1), $3) }
+    | RETURN exp                                                    { `Return $2 }
+    | ID                                                            { `Deref (`Id $1) }
+    | INT                                                           { `Const $1 }
+    | exp SEMICOLON                                                 { $1 }
 
 op_exp:
-    | e1 = op_exp; o = op; e2 = op_exp                           { `Operator (o, e1, e2) }
-    | s = ID                                             { `Deref (`Id s) }
-    | i = INT                                                    { `Const i }
-;
+    | op_exp op op_exp  { `Operator ($2, $1, $3) }
+    | ID                { `Deref (`Id $1) }
+    | INT               { `Const $1 }
 
 op:
     | PLUS   { `Plus   }
@@ -91,9 +78,7 @@ op:
     | NOT    { `Not    }
 
 params:
-    l = separated_list(COMMA, identifier)   { l }
-;
+    separated_list(COMMA, identifier)   { $1 }
 
 identifier:
-    i = ID                          { i }
-;
+    ID  { $1 }
