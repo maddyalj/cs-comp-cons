@@ -7,7 +7,7 @@ let print_position lexbuf =
         eprintf "Pos %s:%d:%d\n" pos.pos_fname pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
 
 let parse_with_error lexbuf =
-    try Parser.top Lexer.read lexbuf with
+    try Parser.prog Lexer.read lexbuf with
         | SyntaxError msg ->
             prerr_string (msg ^ ": ");
             print_position lexbuf;
@@ -21,7 +21,7 @@ let rec parse_and_print lexbuf =
     match parse_with_error lexbuf with
         | [] -> ()
         | p ->
-            printf "%s\n" (Lang.string_of_prog p);
+            printf "%s\n" (Lang.prog_str p);
             parse_and_print lexbuf
 
 let loop filename () =
