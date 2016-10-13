@@ -65,6 +65,6 @@ let rec exp_str n =
         | Id s                 -> sprintf "%s%s" ind s
 let func_str (id, params, exps) =
     let ps = String.concat ~sep:", " params in
-        sprintf "%s(%s) {\n%s\n}" id ps (blk_str "\n" (exp_str 1) exps)
+        sprintf "%s (%s) {\n%s\n}" id ps (blk_str "\n" (exp_str 1) exps)
 let prog_str funcs =
     String.concat ~sep:"\n\n" (List.map funcs ~f:func_str)
