@@ -39,9 +39,11 @@ rule read = parse
     | '-'      { MINUS }
     | '*'      { TIMES }
     | '/'      { DIVIDE }
-    | "<="     { LEQ }
-    | ">="     { GEQ }
-    | "=="     { EQUAL }
+    | "<="     { LTEQ }
+    | '<'      { LT }
+    | ">="     { GTEQ }
+    | '>'      { GT }
+    | "=="     { EQ }
     | "!="     { NOTEQ }
     | "&&"     { AND }
     | "||"     { OR }

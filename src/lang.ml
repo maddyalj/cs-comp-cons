@@ -3,9 +3,11 @@ type op =
     | Minus
     | Times
     | Divide
-    | Leq
-    | Geq
-    | Equal
+    | Lteq
+    | Lt
+    | Gteq
+    | Gt
+    | Eq
     | Noteq
     | And
     | Or
@@ -33,9 +35,11 @@ let op_str = function
     | Minus  -> "-"
     | Times  -> "*"
     | Divide -> "/"
-    | Leq    -> "<="
-    | Geq    -> ">="
-    | Equal  -> "=="
+    | Lteq   -> "<="
+    | Lt     -> "<"
+    | Gteq   -> ">="
+    | Gt     -> "<"
+    | Eq     -> "=="
     | Noteq  -> "!="
     | And    -> "&&"
     | Or     -> "||"

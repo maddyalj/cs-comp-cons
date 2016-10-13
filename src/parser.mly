@@ -7,7 +7,7 @@
     CONST LET EQUALS
     PRINT RETURN
     PLUS MINUS TIMES DIVIDE
-    LEQ GEQ EQUAL NOTEQ
+    LTEQ LT GTEQ GT EQ NOTEQ
     AND OR NOT
     EOF
 
@@ -46,9 +46,11 @@ op:
     | MINUS  { Minus  }
     | TIMES  { Times  }
     | DIVIDE { Divide }
-    | LEQ    { Leq    }
-    | GEQ    { Geq    }
-    | EQUAL  { Equal  }
+    | LTEQ   { Lteq   }
+    | LT     { Lt     }
+    | GTEQ   { Gteq   }
+    | GT     { Gt     }
+    | EQ     { Eq     }
     | NOTEQ  { Noteq  }
     | AND    { And    }
     | OR     { Or     }
