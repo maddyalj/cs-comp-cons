@@ -33,6 +33,7 @@ exp:
     | CONST ID EQUALS exp                              { Const ($2, $4)       }
     | LET ID EQUALS exp                                { Let ($2, $4)         }
     | ID EQUALS exp                                    { Asg ((Id $1), $3)    }
+    | LPAREN exp op exp RPAREN                         { Op ($3, $2, $4)      }
     | exp op exp                                       { Op ($2, $1, $3)      }
     | PRINT exp                                        { Print $2             }
     | RETURN exp                                       { Return $2            }
