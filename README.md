@@ -21,7 +21,7 @@ My language uses c-style syntax, inspired by Javascript.
 ### Function Definition
 ``` js
 main (params) {
-    return 0;
+    0;
 }
 ```
 
@@ -80,3 +80,9 @@ if (i > 0) {
 }
 ```
 The `else` block is optional of course.
+
+### Complex Expression Assignment
+``` js
+(let z = x + y; if (z = 0) { x } else { y }) = 7;
+```
+Put parentheses around expressions to ensure they are parsed into a sequence.
