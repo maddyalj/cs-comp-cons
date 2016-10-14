@@ -24,6 +24,7 @@ main (params) {
     0;
 }
 ```
+To return a value from a function, just add it as the last expression in the function.
 
 ### Local Variables
 ``` js
