@@ -25,7 +25,6 @@ rule read = parse
     | "const"  { CONST }
     | "let"    { LET }
     | "print"  { PRINT }
-    | "return" { RETURN }
     | "if"     { IF }
     | "else"   { ELSE }
     | "while"  { WHILE }
