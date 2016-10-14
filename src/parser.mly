@@ -42,6 +42,7 @@ exp:
     | LET ID EQUALS exp SEMICOLON exp             { Let ($2, $4, $6)      }
     | LET ID EQUALS exp                           { Let ($2, $4, Empty)   }
     | ID EQUALS exp                               { Asg ((Id $1), $3)     }
+    | exp EQUALS exp                              { Asg ($1, $3)          }
     | exp op exp                                  { Op ($2, $1, $3)       }
     | PRINT exp                                   { Print $2              }
     | ID LPAREN separated_list(COMMA, exp) RPAREN { Appl ($1, $3)         }
