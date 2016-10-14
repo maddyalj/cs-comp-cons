@@ -7,7 +7,7 @@
 ``` bash
 $ ./build.sh
 ```
-You can pass the `-i` flag to install `core` and `menhir` using `opam` if they are not already installed.
+This will install `core` and `menhir` using `opam` first if they are not already installed, then build the compiler.
 
 ### Running Tests
 ``` bash
