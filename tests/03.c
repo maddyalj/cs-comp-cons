@@ -1,3 +1,6 @@
+/*
+ * Testing function with params and while statement
+ */
 factorial (n) {
     let result = 1;
     let i = n;
@@ -5,4 +8,5 @@ factorial (n) {
         result * i;
         i = i - 1;
     }
+    i;
 }
