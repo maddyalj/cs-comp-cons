@@ -4,7 +4,7 @@ open Core.Std
 
 let print_position lexbuf =
     let pos = lexbuf.lex_curr_p in
-        eprintf "Pos %s:%d:%d\n" pos.pos_fname pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
+        eprintf "%s:%d:%d\n" pos.pos_fname pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
 
 let parse_with_error lexbuf =
     try Parser.prog Lexer.read lexbuf with
