@@ -28,11 +28,11 @@ To return a value from a function, just add it as the last expression in the fun
 
 ### Comments
 ``` js
-    /*
-        This is a multiline ..
-        .. comment!
-    */
-    some_code(); /* inline comment */
+/*
+    This is a multiline ..
+    .. comment!
+*/
+some_code(); /* inline comment */
 ```
 
 ### Local Variables
