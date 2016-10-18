@@ -89,7 +89,6 @@ if (i > 0) {
     do_something_else();
 }
 ```
-The `else` block is optional of course.
 
 ### Complex Expression Assignment
 ``` js
