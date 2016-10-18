@@ -17,24 +17,27 @@ let parse_with_error lexbuf =
             print_position lexbuf;
             exit (-1)
 
-let rec parse_and_print lexbuf =
+let rec parse_and_print use_eval lexbuf =
     match parse_with_error lexbuf with
         | [] -> ()
         | p  ->
-            printf "OK!\n";
-            (* printf "%s\n" (Lang.prog_str p); *)
-            parse_and_print lexbuf
+            if use_eval then printf "%d\n" (Lang.eval_prog p) else printf "√ ok\n";
+            parse_and_print use_eval lexbuf
 
-let loop filename () =
+let loop use_eval filename () =
     let inx = In_channel.create filename in
         let lexbuf = Lexing.from_channel inx in
             lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
-            parse_and_print lexbuf;
+            parse_and_print use_eval lexbuf;
             In_channel.close inx
 
 let _ =
     Command.basic
         ~summary:"CS Assignment: Parser tool for our special language"
-        Command.Spec.(empty +> anon ("filename" %: file))
+        Command.Spec.(
+            empty
+            +> flag "-e" no_arg ~doc:" evaluate expressions"
+            +> anon ("filename" %: file)
+        )
         loop
     |> Command.run
