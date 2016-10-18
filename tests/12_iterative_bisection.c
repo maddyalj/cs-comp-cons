@@ -11,28 +11,28 @@ bisection (f, l, h, max_i) {
         if (fL == 0) {
             found = 1;
             result = l;
-        }
-
-        let fH = f(h);
-        if (fH == 0) {
-            found = 1;
-            result = h;
-        }
-
-        let fM = f(m);
-        if (fM == 0) {
-            found = 1;
-            result = m;
-        }
-
-        if (fM * fL < 0) {
-            h = m;
         } else {
-            l = m;
-        }
+            let fH = f(h);
+            if (fH == 0) {
+                found = 1;
+                result = h;
+            } else {
+                let fM = f(m);
+                if (fM == 0) {
+                    found = 1;
+                    result = m;
+                } else {
+                    if (fM * fL < 0) {
+                        h = m;
+                    } else {
+                        l = m;
+                    }
 
-        m = (l + h) / 2;
-        i = i + 1;
+                    m = (l + h) / 2;
+                    i = i + 1;
+                }
+            }
+        }
     }
     result;
 }

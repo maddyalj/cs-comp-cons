@@ -1,7 +1,8 @@
 /* ERROR: missing closing braces for function definition */
 abs (a) {
-    if (a > 0) /* { */
+    if (a > 0) {
         a;
+    } else {
+        a * -1;
     }
-    a * -1;
 /* } */

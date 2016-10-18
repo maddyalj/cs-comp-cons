@@ -34,8 +34,7 @@ func:
 exp:
     | LPAREN exp RPAREN                                              { $2 }
     | IF LPAREN exp RPAREN LBRACE exp? RBRACE ELSE LBRACE exp? RBRACE
-                                         { IfElse ($3, some $6, some $10) }
-    | IF LPAREN exp RPAREN LBRACE exp? RBRACE     { If ($3, some $6)      }
+                                             { If ($3, some $6, some $10) }
     | WHILE LPAREN exp RPAREN LBRACE exp? RBRACE  { While ($3, some $6)   }
     | CONST ID EQUALS exp SEMICOLON exp           { Const ($2, $4, $6)    }
     | CONST ID EQUALS exp                         { Const ($2, $4, Empty) }

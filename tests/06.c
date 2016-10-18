@@ -4,8 +4,7 @@
  */
 max (a, b) {
     if (a > b) {
-        if (c) {}
-        a;
+        if (a > 1) { a + 1; } else { a; }
     } else {
         b;
     }

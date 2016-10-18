@@ -4,6 +4,7 @@
 factorial (n) {
     if (n == 0) {
         1; /* extra comment! */
+    } else {
+        n * factorial(n - 1);
     }
-    n * factorial(n - 1);
 }
