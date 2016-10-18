@@ -20,8 +20,9 @@ let parse_with_error lexbuf =
 let rec parse_and_print lexbuf =
     match parse_with_error lexbuf with
         | [] -> ()
-        | _  ->
+        | p  ->
             printf "OK!\n";
+            (* printf "%s\n" (Lang.prog_str p); *)
             parse_and_print lexbuf
 
 let loop filename () =
