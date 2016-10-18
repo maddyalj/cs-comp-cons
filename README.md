@@ -13,7 +13,7 @@ This will install `core` and `menhir` using `opam` first if they are not already
 ``` bash
 $ ./test.sh
 ```
-This will run all the test files existing in the `tests` directory.
+This will run all test files existing in the `tests` directory. If the filename contains a string in the format `.e_VALUE.`, it'll run the evaluator on expressions in the `main` function and compare the output with the `VALUE` in filename.
 
 ## Syntax
 My language uses c-style syntax, inspired by Javascript.
