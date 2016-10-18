@@ -1,8 +1,6 @@
 /*
- * Testing empty function, constants, complex prints and appl
+ * Testing constants, complex prints and appl
  */
-empty_func () {}
-
 do_stuff (x, env) {
     const PRODUCATION = 5;
     if (env != PRODUCATION && x > 0) {

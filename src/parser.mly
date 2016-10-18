@@ -1,10 +1,3 @@
-%{
-    open Lang
-    let some = function
-        | None   -> Empty
-        | Some e -> e
-%}
-
 %token <int> INT
 %token <string> ID
 %token
@@ -28,28 +21,34 @@ prog:
     | func* EOF { $1 }
 
 func:
-    | ID LPAREN separated_list(COMMA, ID) RPAREN LBRACE exp? RBRACE
-                                              { ($1, $3, some $6) }
+    | ID LPAREN separated_list(COMMA, ID) RPAREN LBRACE seq_exp RBRACE
+                                                      { ($1, $3, $6) }
+
+seq_exp:
+    | CONST ID EQUALS exp SEMICOLON seq_exp { Const ($2, $4, $6)    }
+    | CONST ID EQUALS exp SEMICOLON         { Const ($2, $4, Empty) }
+    | LET ID EQUALS exp SEMICOLON seq_exp   { Let ($2, $4, $6)      }
+    | LET ID EQUALS exp SEMICOLON           { Let ($2, $4, Empty)   }
+    | exp SEMICOLON seq_exp                 { Seq ($1, $3)          }
+    | exp seq_exp                           { Seq ($1, $2)          }
+    | exp SEMICOLON?                        { $1                    }
 
 exp:
-    | LPAREN exp RPAREN                                              { $2 }
-    | IF LPAREN exp RPAREN LBRACE exp? RBRACE ELSE LBRACE exp? RBRACE
-                                             { If ($3, some $6, some $10) }
-    | WHILE LPAREN exp RPAREN LBRACE exp? RBRACE  { While ($3, some $6)   }
-    | CONST ID EQUALS exp SEMICOLON exp           { Const ($2, $4, $6)    }
-    | CONST ID EQUALS exp                         { Const ($2, $4, Empty) }
-    | LET ID EQUALS exp SEMICOLON exp             { Let ($2, $4, $6)      }
-    | LET ID EQUALS exp                           { Let ($2, $4, Empty)   }
-    | ID EQUALS exp                               { Asg ((Id $1), $3)     }
-    | exp op exp                                  { Op ($2, $1, $3)       }
-    | PRINT exp                                   { Print $2              }
-    | ID LPAREN separated_list(COMMA, exp) RPAREN { Appl ($1, $3)         }
-    | ID                                          { Deref (Id $1)         }
-    | INT                                         { Val $1                }
-    | exp SEMICOLON exp                           { Seq ($1, $3)          }
-    | exp EQUALS exp                              { Asg ($1, $3)          }
-    | exp SEMICOLON                               { $1                    }
-    | exp exp                                     { Seq ($1, $2)          }
+    | LPAREN seq_exp RPAREN                         { $2                    }
+    | IF LPAREN exp RPAREN LBRACE seq_exp RBRACE ELSE LBRACE seq_exp RBRACE
+                                                    { If ($3, $6, $10)      }
+    | WHILE LPAREN exp RPAREN LBRACE seq_exp RBRACE { While ($3, $6)        }
+    | CONST ID EQUALS exp SEMICOLON seq_exp         { Const ($2, $4, $6)    }
+    | CONST ID EQUALS exp                           { Const ($2, $4, Empty) }
+    | LET ID EQUALS exp SEMICOLON seq_exp           { Let ($2, $4, $6)      }
+    | LET ID EQUALS exp                             { Let ($2, $4, Empty)   }
+    | ID EQUALS exp                                 { Asg ((Id $1), $3)     }
+    | PRINT exp                                     { Print $2              }
+    | ID LPAREN separated_list(COMMA, exp) RPAREN   { Appl ($1, $3)         }
+    | ID                                            { Deref (Id $1)         }
+    | exp EQUALS exp                                { Asg ($1, $3)          }
+    | INT                                           { Val $1                }
+    | exp op exp                                    { Op ($2, $1, $3)       }
 
 op:
     | PLUS   { Plus   }
