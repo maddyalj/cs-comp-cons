@@ -19,7 +19,7 @@ do
             printf "× Wrong\n"
         fi
     else
-        ./tester.native $file
+        ./tester.native $file -e
     fi
     printf "\n"
 done
