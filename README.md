@@ -68,6 +68,13 @@ sum(x, y);
 print x;
 ```
 
+### Debugging
+``` js
+dump(x);
+dump(x + 3);
+dump(x, y);
+```
+
 ### Reading User Input (Int Only - for now)
 ``` js
 let x = read_int();
