@@ -12,7 +12,7 @@ do
         printf "Expected value = %d\n" $expected
         output=$(./tester.native $file -e)
         printf "Actual value   = $output\n"
-        if [[ $output == $expected ]]
+        if [[ $output == *$expected ]]
         then
             printf "√ Correct\n"
         else

@@ -30,3 +30,7 @@ bisection (f, l, h, i) {
         }
     }
 }
+
+main () {
+    0;
+}

@@ -36,3 +36,7 @@ bisection (f, l, h, max_i) {
     }
     result;
 }
+
+main () {
+    0;
+}

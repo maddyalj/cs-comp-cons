@@ -10,3 +10,7 @@ factorial (n) {
     }
     i;
 }
+
+main () {
+    0;
+}
