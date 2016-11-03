@@ -138,12 +138,13 @@ let rec opt_exp p = function
     | Op (op,  e1, e2)       -> Op (op, opt_exp p e1, opt_exp p e2)
     | Print e                -> Print (opt_exp p e)
     | Appl (s, es)           -> let es = List.map (opt_exp p) es in
-        if List.for_all (fun e -> match e with | Val n -> true | _ -> false) es
+        if List.for_all (fun e -> match e with | Val _ -> true | _ -> false) es
         then (
-            oi := !oi + 1;
-            let (_, pars, e) = get_func s p in let e = ref e and get_val = function | Val n -> n | _ -> raise Not_found in
+            try let (_, pars, e) = get_func s p in let e = ref e and get_val = function | Val n -> n | _ -> raise Not_found in
+                oi := !oi + 1;
                 List.iteri (fun i par -> e := rep_with_val par (get_val (List.nth es i)) !e) pars;
                 opt_exp p !e
+            with Not_found -> Appl (s, es)
         )
         else Appl (s, es)
     | Seq (e1, e2)           -> let e1 = opt_exp p e1 in (match e1 with
