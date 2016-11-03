@@ -5,29 +5,29 @@ wrong_results=0
 printf "\n"
 for file in tests/*
 do
-    printf "${bold}## Testing $(basename $file)${normal}\n"
+    printf "${bold}### Testing $(basename $file)${normal}\n"
     if [[ $file == *.e_*.* ]]
     then
         expected=${file#*.e_}
         expected=${expected%.*}
-        printf "Expected value = %d\n" $expected
+        printf "# Expected value = %d\n" $expected
         output=$(./tester.native $file -e)
-        printf "Actual value = $output\n"
+        printf "# Actual value = $output"
         if [[ $output == *$expected ]]
         then
-            printf "√ Correct\n"
+            printf " √ Correct\n"
         else
             ((wrong_results++))
-            printf "× Wrong\n"
+            printf " × FAILED\n"
         fi
         optimized=$(./tester.native $file -e -o)
-        printf "(With optimization) = $optimized\n"
+        printf "# (With optimization) = $optimized"
         if [[ $optimized == *$expected ]]
         then
-            printf "√ Correct\n"
+            printf " √ Correct\n"
         else
             ((wrong_results++))
-            printf "× Wrong\n"
+            printf " × FAILED\n"
         fi
     else
         ./tester.native $file -e
@@ -37,7 +37,7 @@ done
 
 if [[ $wrong_results = 0 ]]
 then
-    echo '√√√ ALL TESTS PASSED!'
+    echo '√√√ All tests passed!'
 else
     echo '×' $wrong_results 'TESTS FAILED!'
 fi
