@@ -5,13 +5,15 @@
 
 ### Building Compiler
 ``` bash
-$ ./build.sh
+$ make build
+$ make build-part5 # to build Interpreter and Code Generator
 ```
 This will install `core` and `menhir` using `opam` first if they are not already installed, then build the compiler.
 
 ### Running Tests
 ``` bash
-$ ./test.sh
+$ make test
+$ make test-part5 # to test Interpreter and Code Generator
 ```
 This will run all test files existing in the `tests` directory. If the filename contains a string in the format `.e_VALUE.`, it will output the test actual value and expect it to be the same as `VALUE`.
 

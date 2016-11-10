@@ -158,3 +158,138 @@ let eval_prog prog o =
         let exp = if o then opt_exp prog e else e in
             let result = eval_exp o prog (Hashtbl.create 100) exp in
                 if o then (printf "(#opt %d) " !oi; result) else result
+
+(* Configuration *)
+open Hashtbl
+let ram : (int, int) t = Hashtbl.create 100
+let acc = ref 0
+let addr_base = ref 0
+
+(* Instruction execution *)
+let op (op, addr1, addr2) = acc := op (find ram addr1) (find ram addr2)
+let st addr = replace ram addr !acc
+let ldc n = acc := n
+let mv addr addr' = replace ram addr' (find ram addr)
+
+let fun_of_op = function
+    | Plus   -> (+)
+    | Minus  -> (-)
+    | Times  -> ( * )
+    | Divide -> (/)
+    | _      -> raise Not_found
+
+let string_of_op = function
+    | Plus   -> "add"
+    | Minus  -> "min"
+    | Times  -> "tim"
+    | Divide -> "div"
+    | _      -> raise Not_found
+
+let new_addr () =
+    addr_base := !addr_base + 1;
+    !addr_base
+
+let rec lookup x = function
+    | (i, v) :: symt -> if (String.compare x i) == 0 then v else lookup x symt
+    | [] -> raise Not_found
+
+let rec change x v' = function
+    | (i, v) :: symt -> if (String.compare x i) == 0 then (i, v') :: symt else (i, v) :: change x v' symt
+    | [] -> []
+
+let rec interpret s symt = function
+    | Op (oper, e1, e2) ->
+        let addr1 = interpret s symt e1 in
+            let addr2 = interpret s symt e2 in
+                op (fun_of_op oper, addr1, addr2);
+                addr_base := addr1;
+                st addr1;
+                addr1;
+    | Id x ->
+        let addr = lookup x symt in
+            let addr' = new_addr () in
+                mv addr addr';
+                addr';
+    | Val n ->
+        let addr = new_addr () in
+            ldc n;
+            st addr;
+            addr
+    | Const (x, e1, e2) ->
+        let addr1 = interpret s symt e1 in
+            let addr2 = interpret s ((x, addr1) :: symt) e2 in
+                mv addr2 addr1;
+                addr_base := addr1;
+                addr1
+    | Let (x, e1, e2) ->
+        let addr1 = interpret s symt e1 in
+            replace s x addr1;
+            interpret s ((x, addr1) :: symt) e2
+    | Asg (Id x, e) ->
+        let addr = interpret s symt e in
+            let addr' = lookup x symt in
+                replace s x addr;
+                mv addr addr';
+                addr_base := addr';
+                addr'
+    | Seq (e1, e2) ->
+        let _ = interpret s symt e1 in
+            interpret s symt e2
+    | Empty -> 0
+    | _ -> raise Not_found
+
+(* Instruction compilation *)
+let code = Buffer.create 100
+let codegen_op (op, addr1, addr2) =
+    (string_of_op op) ^ " r" ^ (string_of_int addr1) ^ ", r" ^ (string_of_int addr2) ^ "\n"
+    |> Buffer.add_string code
+let codegen_st addr =
+    "st  r" ^ (string_of_int addr) ^ "\n"
+    |> Buffer.add_string code
+let codegen_ldc n =
+    "ld  " ^ (string_of_int n) ^ "\n"
+    |> Buffer.add_string code
+let codegen_mv addr addr' =
+    "mv  r" ^ (string_of_int addr) ^ ", r" ^ (string_of_int addr') ^ "\n"
+    |> Buffer.add_string code
+
+let rec codegen s symt = function
+    | Op (oper, e1, e2) ->
+        let addr1 = codegen s symt e1 in
+            let addr2 = codegen s symt e2 in
+                codegen_op (oper, addr1, addr2);
+                addr_base := addr1;
+                codegen_st addr1;
+                addr1;
+    | Id x ->
+        let addr = lookup x symt in
+            let addr' = new_addr () in
+                codegen_mv addr addr';
+                addr';
+    | Val n ->
+        let addr = new_addr () in
+            codegen_ldc n;
+            codegen_st addr;
+            addr
+    | Const (x, e1, e2) ->
+        let addr1 = codegen s symt e1 in
+            let addr2 = codegen s ((x, addr1) :: symt) e2 in
+                codegen_mv addr2 addr1;
+                addr_base := addr1;
+                addr1
+    | Let (x, e1, e2) ->
+        let addr1 = codegen s symt e1 in
+            replace s x addr1;
+            codegen s ((x, addr1) :: symt) e2
+    | Asg (Id x, e) ->
+        let addr = codegen s symt e in
+            let addr' = lookup x symt in
+                replace s x addr;
+                codegen_mv addr addr';
+                addr_base := addr';
+                addr'
+    | Seq (e1, e2) ->
+        let _ = codegen s symt e1 in
+            codegen s symt e2
+    | Empty -> 0
+    | _ -> raise Not_found
