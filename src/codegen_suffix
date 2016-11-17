@@ -1,0 +1,15 @@
+	// END OF GENERATED CODE
+	popq	%rdi
+	callq	_print
+	movl	$1, %eax
+	addq	$16, %rsp
+	popq	%rbp
+	retq
+	.cfi_endproc
+
+	.section	__TEXT,__cstring,cstring_literals
+L_.str:                                 ## @.str
+	.asciz	"%d\n"
+
+
+.subsections_via_symbols

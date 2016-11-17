@@ -16,3 +16,11 @@ build-part5:
 
 test-part5:
 	./part5.native
+
+all-part6: build-part6 test-part6
+
+build-part6:
+	corebuild src/part6.native
+
+test-part6:
+	./part6.native

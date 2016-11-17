@@ -293,3 +293,66 @@ let rec codegen s symt = function
             codegen s symt e2
     | Empty -> 0
     | _ -> raise Not_found
+
+let sp = ref 0
+
+let string_of_op_x86 = function
+    | Plus   -> "add"
+    | Minus  -> "sub"
+    | Times  -> "imul"
+    | Divide -> "idiv"
+    | _      -> raise Not_found
+
+let codegenx86_op op =
+    "\tpop\t%rax\n" ^ "\tpop\t%rbx\n\t" ^ (string_of_op_x86 op) ^ "\t%rax, %rbx\n" ^ "\tpush\t%rbx\n"
+    |> Buffer.add_string code
+let codegenx86_id addr =
+    "\t//offset " ^ (string_of_int addr) ^ "\n" ^ "\tmov\t" ^ (-16 - 8 * addr |> string_of_int) ^ "(%rbp), %rax\n" ^ "\tpush\t%rax\n"
+    |> Buffer.add_string code
+let codegenx86_st addr =
+    "\tpush\t$" ^ (string_of_int addr) ^ "\n"
+    |> Buffer.add_string code
+let codegenx86_let _ =
+    "\tpop\t%rax\n" ^ "\tpop\t%rbx\n" ^ "\tpush\t%rax\n"
+    |> Buffer.add_string code
+let codegenx86_ldc n =
+    "\tld\t" ^ (string_of_int n) ^ "\n"
+    |> Buffer.add_string code
+let codegenx86_mv addr addr' =
+    "\tmv\tr" ^ (string_of_int addr) ^ ", r" ^ (string_of_int addr') ^ "\n"
+    |> Buffer.add_string code
+
+let rec codegenx86 s symt = function
+    | Op (op, e1, e2) -> (match op with
+        | Divide -> codegenx86 s symt (Op (Times, e1, Val (1 / (eval_exp false [] (Hashtbl.create 100) e2))))
+        | _ ->
+            codegenx86 s symt e1;
+            codegenx86 s symt e2;
+            codegenx86_op op;
+            sp := !sp - 1
+    )
+    | Id x ->
+        let addr = lookup x symt in
+            codegenx86_id (addr);
+            sp := !sp + 1
+    | Val n ->
+        codegenx86_st n;
+        sp := !sp + 1
+    | Const (x, e1, e2) ->
+        codegenx86 s symt e1;
+        codegenx86 s ((x, !sp) :: symt) e2;
+        codegenx86_let ()
+    | Let (x, e1, e2) ->
+        codegenx86 s symt e1;
+        codegenx86 s ((x, !sp) :: symt) e2;
+        codegenx86_let ()
+    | Asg (Id x, e) ->
+        codegenx86 s symt e;
+        codegenx86 s ((x, !sp) :: symt) e;
+        codegenx86_let ()
+    | Seq (e1, e2) ->
+        codegenx86 s symt e1;
+        codegenx86 s symt e2;
+        codegenx86_let ()
+    | Empty -> ()
+    | _ -> raise Not_found
