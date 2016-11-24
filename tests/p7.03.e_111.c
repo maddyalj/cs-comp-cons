@@ -1,5 +1,5 @@
 /*
- * Testing const and op
+ * Testing nested if statements
  */
 main () {
     if (0) {

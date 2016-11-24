@@ -1,3 +1,4 @@
+EPROG:
 	// END OF GENERATED CODE
 	popq	%rdi
 	callq	_print

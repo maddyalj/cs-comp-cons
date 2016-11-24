@@ -308,7 +308,7 @@ let codegenx86_op op =
     "\tpop\t%rax\n" ^ "\tpop\t%rbx\n\t" ^ (string_of_op_x86 op) ^ "\t%rax, %rbx\n" ^ "\tpush\t%rbx\n"
     |> Buffer.add_string code
 let codegenx86_id addr =
-    "\t//offset " ^ (string_of_int addr) ^ "\n" ^ "\tmov\t" ^ (-16 - 8 * addr |> string_of_int) ^ "(%rbp), %rax\n" ^ "\tpush\t%rax\n"
+    "\t// offset " ^ (string_of_int addr) ^ "\n" ^ "\tmov\t" ^ (-16 - 8 * addr |> string_of_int) ^ "(%rbp), %rax\n" ^ "\tpush\t%rax\n"
     |> Buffer.add_string code
 let codegenx86_st addr =
     "\tpush\t$" ^ (string_of_int addr) ^ "\n"
@@ -340,13 +340,31 @@ let codegenx86_while csec =
 let codegenx86_endwhile csec =
     "\tpop\t%rax\n" ^ "\tjmp\tSEC" ^ (string_of_int csec) ^ "\n" ^ "ESEC" ^ (string_of_int csec) ^ ":\n" ^ "\tpush\t$0\n"
     |> Buffer.add_string code
+let codegenx86_appl s =
+    "\tcall\tFUNC_" ^ (String.uppercase_ascii s) ^ "\n" ^ "\tpush\t%rax\n"
+    |> Buffer.add_string code
+let codegenx86_func f =
+    "FUNC_" ^ (String.uppercase_ascii f) ^ ":\n"
+    |> Buffer.add_string code
+let codegenx86_endfunc _ =
+    "\tpop\t%rax\n"
+    |> Buffer.add_string code
+let codegenx86_poppar _ =
+    "\tpop\t%rbx\n"
+    |> Buffer.add_string code
+let codegenx86_retfunc _ =
+    "\tret\n"
+    |> Buffer.add_string code
+let codegenx86_endmain _ =
+    "\tjmp\tEPROG\n"
+    |> Buffer.add_string code
 
-let rec codegenx86 s symt = function
+let rec codegenx86 symt = function
     | Op (op, e1, e2) -> (match op with
-        | Divide -> codegenx86 s symt (Op (Times, e1, Val (1 / (eval_exp false [] (Hashtbl.create 100) e2))))
+        | Divide -> codegenx86 symt (Op (Times, e1, Val (1 / (eval_exp false [] (Hashtbl.create 100) e2))))
         | _ ->
-            codegenx86 s symt e1;
-            codegenx86 s symt e2;
+            codegenx86 symt e1;
+            codegenx86 symt e2;
             codegenx86_op op;
             sp := !sp - 1
     )
@@ -358,37 +376,57 @@ let rec codegenx86 s symt = function
         codegenx86_st n;
         sp := !sp + 1
     | Const (x, e1, e2) ->
-        codegenx86 s symt e1;
-        codegenx86 s ((x, !sp) :: symt) e2;
+        codegenx86 symt e1;
+        codegenx86 ((x, !sp) :: symt) e2;
         codegenx86_let ()
     | Let (x, e1, e2) ->
-        codegenx86 s symt e1;
-        codegenx86 s ((x, !sp) :: symt) e2;
+        codegenx86 symt e1;
+        codegenx86 ((x, !sp) :: symt) e2;
         codegenx86_let ()
     | Asg (Id x, e) ->
         let addr = lookup x symt in
-            codegenx86 s symt e;
+            codegenx86 symt e;
             codegenx86_asg addr
     | Seq (e1, e2) ->
-        codegenx86 s symt e1;
+        codegenx86 symt e1;
         codegenx86_seq ();
-        codegenx86 s symt e2
+        codegenx86 symt e2
     | If (e1, e2, e3) ->
         let csec = !sec in
             sec := !sec + 1;
-            codegenx86 s symt e1;
+            codegenx86 symt e1;
             codegenx86_if csec;
-            codegenx86 s symt e2;
+            codegenx86 symt e2;
             codegenx86_else csec;
-            codegenx86 s symt e3;
+            codegenx86 symt e3;
             codegenx86_endif csec
     | While (e1, e2) ->
         let csec = !sec in
             sec := !sec + 1;
             codegenx86_startwhile csec;
-            codegenx86 s symt e1;
+            codegenx86 symt e1;
             codegenx86_while csec;
-            codegenx86 s symt e2;
+            codegenx86 symt e2;
             codegenx86_endwhile csec
-    | Empty -> ()
+    | Appl (s, es) ->
+        List.iter (codegenx86 symt) es;
+        codegenx86_appl s;
+        sp := !sp + 1
+    | Empty -> codegenx86 symt (Val 0)
     | _ -> raise Not_found
+
+let codegenx86_prog p =
+    let (_, _, e) = get_func "main" p in
+        Buffer.reset code;
+        sp := 0;
+        sec := 0;
+        (* output_string stdout (exp_str e); *)
+        codegenx86 [] e;
+        codegenx86_endmain ();
+        List.iter (fun (f, pars, exp) ->
+            codegenx86_func f;
+            codegenx86 (List.mapi (fun i par -> (par, i + !sp - 1)) pars) exp;
+            codegenx86_endfunc ();
+            List.iter (fun _ -> codegenx86_poppar ()) pars;
+            codegenx86_retfunc ()
+        ) (List.filter (fun (f, _, _) -> (String.compare f "main") != 0) p)

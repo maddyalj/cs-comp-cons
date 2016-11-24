@@ -1,5 +1,5 @@
 /*
- * Testing const and op
+ * Testing while statements
  */
 main () {
     let x = 5;

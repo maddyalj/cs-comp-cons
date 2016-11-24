@@ -1,5 +1,5 @@
 /*
- * Testing const and op
+ * Testing const, op and seq
  */
 main () {
     const A = 10;

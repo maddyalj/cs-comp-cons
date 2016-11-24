@@ -1,9 +1,10 @@
 /*
- * Testing const and op
+ * Testing unused while
  */
 main () {
+    let x = 6;
     while (0) {
-        1;
+        x = x - 3;
     }
-    6;
+    x;
 }

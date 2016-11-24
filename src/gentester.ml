@@ -11,16 +11,11 @@ let codegen_prefix = Buffer.create 100
 let codegen_suffix = Buffer.create 100
 
 let codegen_test p =
-    let (_, _, e) = get_func "main" p in
-        Buffer.reset code;
-        sp := 0;
-        sec := 0;
-        (* output_string stdout (exp_str e); *)
-        codegenx86 (Hashtbl.create 100) [] e;
-        Buffer.output_buffer stdout code;
-        Std.Out_channel.write_all
-            ("generatedx86/test_" ^ (string_of_int !i) ^ ".s")
-            ~data:((Buffer.contents codegen_prefix) ^ (Buffer.contents code) ^ (Buffer.contents codegen_suffix))
+    codegenx86_prog p;
+    Buffer.output_buffer stdout code;
+    Std.Out_channel.write_all
+        ("generatedx86/test_" ^ (string_of_int !i) ^ ".s")
+        ~data:((Buffer.contents codegen_prefix) ^ (Buffer.contents code) ^ (Buffer.contents codegen_suffix))
 
 let is_digit c =
     if c == '-' then true else try
