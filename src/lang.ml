@@ -317,7 +317,10 @@ let codegenx86_let _ =
     "\tpop\t%rax\n" ^ "\tpop\t%rbx\n" ^ "\tpush\t%rax\n"
     |> Buffer.add_string code
 let codegenx86_asg addr =
-    "\tpop\t%rax\n" ^ "\tpop\t%rbx\n" ^ "\tmovl\t$5, " ^ (-16 - 8 * addr |> string_of_int) ^ "(%rbp)\n"
+    "\tpop\t%rax\n" ^ "\tmov\t%rax, " ^ (-16 - 8 * addr |> string_of_int) ^ "(%rbp)\n" ^ "\tpush\t%rax\n"
+    |> Buffer.add_string code
+let codegenx86_seq _ =
+    "\tpop\t%rax\n"
     |> Buffer.add_string code
 let codegenx86_if csec =
     "\tpop\t%rax\n" ^ "\tcmp\t$0, %rax\n" ^ "\tje\tSEC" ^ (string_of_int csec) ^ "\n"
@@ -335,7 +338,7 @@ let codegenx86_while csec =
     "\tpop\t%rax\n" ^ "\tcmp\t$0, %rax\n" ^ "\tje\tESEC" ^ (string_of_int csec) ^ "\n"
     |> Buffer.add_string code
 let codegenx86_endwhile csec =
-    "\tjmp SEC" ^ (string_of_int csec) ^ "\n" ^ "ESEC" ^ (string_of_int csec) ^ ":\n"
+    "\tpop\t%rax\n" ^ "\tjmp\tSEC" ^ (string_of_int csec) ^ "\n" ^ "ESEC" ^ (string_of_int csec) ^ ":\n" ^ "\tpush\t$0\n"
     |> Buffer.add_string code
 
 let rec codegenx86 s symt = function
@@ -368,7 +371,8 @@ let rec codegenx86 s symt = function
             codegenx86_asg addr
     | Seq (e1, e2) ->
         codegenx86 s symt e1;
-        codegenx86 s symt e2;
+        codegenx86_seq ();
+        codegenx86 s symt e2
     | If (e1, e2, e3) ->
         let csec = !sec in
             sec := !sec + 1;
