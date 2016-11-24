@@ -205,7 +205,7 @@ let rec interpret s symt = function
                 addr_base := addr1;
                 st addr1;
                 addr1;
-    | Id x ->
+    | Deref (Id x) ->
         let addr = lookup x symt in
             let addr' = new_addr () in
                 mv addr addr';
@@ -261,7 +261,7 @@ let rec codegen s symt = function
                 addr_base := addr1;
                 codegen_st addr1;
                 addr1;
-    | Id x ->
+    | Deref (Id x) ->
         let addr = lookup x symt in
             let addr' = new_addr () in
                 codegen_mv addr addr';
@@ -295,6 +295,7 @@ let rec codegen s symt = function
     | _ -> raise Not_found
 
 let sp = ref 0
+let sec = ref 0
 
 let string_of_op_x86 = function
     | Plus   -> "add"
@@ -315,11 +316,26 @@ let codegenx86_st addr =
 let codegenx86_let _ =
     "\tpop\t%rax\n" ^ "\tpop\t%rbx\n" ^ "\tpush\t%rax\n"
     |> Buffer.add_string code
-let codegenx86_ldc n =
-    "\tld\t" ^ (string_of_int n) ^ "\n"
+let codegenx86_asg addr =
+    "\tpop\t%rax\n" ^ "\tpop\t%rbx\n" ^ "\tmovl\t$5, " ^ (-16 - 8 * addr |> string_of_int) ^ "(%rbp)\n"
     |> Buffer.add_string code
-let codegenx86_mv addr addr' =
-    "\tmv\tr" ^ (string_of_int addr) ^ ", r" ^ (string_of_int addr') ^ "\n"
+let codegenx86_if csec =
+    "\tpop\t%rax\n" ^ "\tcmp\t$0, %rax\n" ^ "\tje\tSEC" ^ (string_of_int csec) ^ "\n"
+    |> Buffer.add_string code
+let codegenx86_else csec =
+    "\tjmp\tESEC" ^ (string_of_int csec) ^ "\n" ^ "SEC" ^ (string_of_int csec) ^ ":\n"
+    |> Buffer.add_string code
+let codegenx86_endif csec =
+    "ESEC" ^ (string_of_int csec) ^ ":\n"
+    |> Buffer.add_string code
+let codegenx86_startwhile csec =
+    "SEC" ^ (string_of_int csec) ^ ":\n"
+    |> Buffer.add_string code
+let codegenx86_while csec =
+    "\tpop\t%rax\n" ^ "\tcmp\t$0, %rax\n" ^ "\tje\tESEC" ^ (string_of_int csec) ^ "\n"
+    |> Buffer.add_string code
+let codegenx86_endwhile csec =
+    "\tjmp SEC" ^ (string_of_int csec) ^ "\n" ^ "ESEC" ^ (string_of_int csec) ^ ":\n"
     |> Buffer.add_string code
 
 let rec codegenx86 s symt = function
@@ -331,7 +347,7 @@ let rec codegenx86 s symt = function
             codegenx86_op op;
             sp := !sp - 1
     )
-    | Id x ->
+    | Deref (Id x) ->
         let addr = lookup x symt in
             codegenx86_id (addr);
             sp := !sp + 1
@@ -347,12 +363,28 @@ let rec codegenx86 s symt = function
         codegenx86 s ((x, !sp) :: symt) e2;
         codegenx86_let ()
     | Asg (Id x, e) ->
-        codegenx86 s symt e;
-        codegenx86 s ((x, !sp) :: symt) e;
-        codegenx86_let ()
+        let addr = lookup x symt in
+            codegenx86 s symt e;
+            codegenx86_asg addr
     | Seq (e1, e2) ->
         codegenx86 s symt e1;
         codegenx86 s symt e2;
-        codegenx86_let ()
+    | If (e1, e2, e3) ->
+        let csec = !sec in
+            sec := !sec + 1;
+            codegenx86 s symt e1;
+            codegenx86_if csec;
+            codegenx86 s symt e2;
+            codegenx86_else csec;
+            codegenx86 s symt e3;
+            codegenx86_endif csec
+    | While (e1, e2) ->
+        let csec = !sec in
+            sec := !sec + 1;
+            codegenx86_startwhile csec;
+            codegenx86 s symt e1;
+            codegenx86_while csec;
+            codegenx86 s symt e2;
+            codegenx86_endwhile csec
     | Empty -> ()
     | _ -> raise Not_found

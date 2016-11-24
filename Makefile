@@ -24,3 +24,14 @@ build-part6:
 
 test-part6:
 	./part6.native
+
+all-part7: build-part7 test-part7
+
+build-part7:
+	opam install core
+	opam install menhir
+	corebuild -use-menhir src/parser.mli
+	corebuild -use-menhir src/gentester.native
+
+test-part7:
+	./gentester.native p7

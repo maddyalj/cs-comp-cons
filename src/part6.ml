@@ -79,7 +79,7 @@ let _ =
         (140, Const (
             "X",
             Op (Plus, Val 30, Val 40),
-            Op (Plus, Id "X", Id "X")
+            Op (Plus, Deref (Id "X"), Deref (Id "X"))
         ));
 
         (* Test 2 *)
@@ -87,8 +87,8 @@ let _ =
             "A",
             Val 10,
             Seq (
-                Op (Plus, Id "A", Val 5),
-                Op (Times, Id "A", Val 2)
+                Op (Plus, Deref (Id "A"), Val 5),
+                Op (Times, Deref (Id "A"), Val 2)
             )
         ));
 
@@ -98,8 +98,8 @@ let _ =
             Op (Plus, Val 1, Val 2),
             Const (
                 "Y",
-                Op (Minus, Val 6, Id "x"),
-                Op (Times, Id "Y", Id "x")
+                Op (Minus, Val 6, Deref (Id "x")),
+                Op (Times, Deref (Id "Y"), Deref (Id "x"))
             )
         ));
 
@@ -107,14 +107,14 @@ let _ =
         (150, Const (
             "ENV",
             Op (Times, Val 10, Val 3),
-            Op (Times, Id "ENV", Val 5)
+            Op (Times, Deref (Id "ENV"), Val 5)
         ));
 
         (* Test 5 *)
         (-14, Let (
             "x",
             Val (-10),
-            Op (Minus, Id "x", Val 4)
+            Op (Minus, Deref (Id "x"), Val 4)
         ));
 
         (* Test 6 *)
@@ -124,7 +124,7 @@ let _ =
             Const (
                 "y",
                 Val 11,
-                Op (Plus, Id "x", Id "y")
+                Op (Plus, Deref (Id "x"), Deref (Id "y"))
             )
         ));
     ];
