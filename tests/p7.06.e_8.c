@@ -7,6 +7,7 @@ sum () {
 }
 
 main () {
-    let x = 3 + sum();
+    let x = 3;
+    x = x + sum();
     x;
 }

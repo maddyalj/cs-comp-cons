@@ -1,6 +1,9 @@
 /*
  * Testing with iterative implementation of root bisection algorithm
  */
+
+f(x) {0}
+
 bisection (f, l, h, max_i) {
     let found = 0;
     let result = 0;

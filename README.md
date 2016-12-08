@@ -6,18 +6,12 @@
 ### Building Compiler
 ``` bash
 $ make build
-$ make build-part5 # to build Interpreter and Code Generator
-$ make build-part6 # to build x86 Code Generator
-$ make build-part7 # to build x86 Code Generator
 ```
 This will install `core` and `menhir` using `opam` first if they are not already installed, then build the compiler.
 
 ### Running Tests
 ``` bash
 $ make test
-$ make test-part5 # to test Interpreter and Code Generator
-$ make test-part6 # to test x86 Code Generator
-$ make test-part7 # to test x86 Code Generator
 ```
 This will run all test files existing in the `tests` directory. If the filename contains a string in the format `.e_VALUE.`, it will output the test actual value and expect it to be the same as `VALUE`.
 

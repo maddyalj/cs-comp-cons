@@ -5,5 +5,5 @@
 main () {
     let x = 1;
     let y = 5;
-    (let z = x + y; if (z = 0) { x } else { y }) = 7;
+    // (let z = x + y; if (z = 0) { x } else { y }) = 7;
 }

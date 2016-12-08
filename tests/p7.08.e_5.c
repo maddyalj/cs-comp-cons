@@ -6,7 +6,7 @@ main () {
     const START = 1;
     let i = 20;
     let sum = 30;
-    if (START) {
+    if (!START) {
         while (i) {
             if (i - 15) { 0 } else { i = 10 }
             sum = sum - i;

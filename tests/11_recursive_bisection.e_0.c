@@ -1,6 +1,9 @@
 /*
  * Testing with recursive implementation of root bisection algorithm
  */
+
+f(x) {0}
+
 bisection (f, l, h, i) {
     let m = (l + h) / 2;
     if (i == 0) {

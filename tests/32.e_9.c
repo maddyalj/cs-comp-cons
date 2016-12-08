@@ -4,10 +4,7 @@
 
 main () {
     let x = 3;
-    print x;
-    let x = x + 4;
-    print x;
-    let x = x + 2;
-    print x;
-    x;
+    let y = 4;
+    let z = 9;
+    z;
 }

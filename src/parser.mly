@@ -9,6 +9,12 @@
     LTEQ LT GTEQ GT EQ NOTEQ
     AND OR NOT
     EOF
+%left OR
+%left AND
+%left LTEQ LT GTEQ GT EQ NOTEQ
+%left PLUS MINUS
+%left TIMES DIVIDE
+%left NOT
 
 %type <Lang.func> func
 %type <Lang.exp> exp
@@ -49,18 +55,18 @@ exp:
     | exp EQUALS exp                                { Asg ($1, $3)          }
     | INT                                           { Val $1                }
     | exp op exp                                    { Op ($2, $1, $3)       }
+    | NOT exp                                       { Op (Not, $2, Empty)   }
 
-op:
-    | PLUS   { Plus   }
-    | MINUS  { Minus  }
-    | TIMES  { Times  }
-    | DIVIDE { Divide }
-    | LTEQ   { Lteq   }
-    | LT     { Lt     }
-    | GTEQ   { Gteq   }
-    | GT     { Gt     }
-    | EQ     { Eq     }
-    | NOTEQ  { Noteq  }
-    | AND    { And    }
-    | OR     { Or     }
-    | NOT    { Not    }
+%inline op:
+    | PLUS   { Plus : Lang.op   }
+    | MINUS  { Minus : Lang.op  }
+    | TIMES  { Times : Lang.op  }
+    | DIVIDE { Divide : Lang.op }
+    | LTEQ   { Lteq : Lang.op   }
+    | LT     { Lt : Lang.op     }
+    | GTEQ   { Gteq : Lang.op   }
+    | GT     { Gt : Lang.op     }
+    | EQ     { Eq : Lang.op     }
+    | NOTEQ  { Noteq : Lang.op  }
+    | AND    { And : Lang.op    }
+    | OR     { Or : Lang.op     }
